@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from io import BytesIO
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import MultiModalMessage
@@ -45,6 +45,36 @@ class ImageDescription(BaseModel):
     orientation: Literal["retrato", "paisaje", "cuadrado"] = Field(
         description="La orientacion de la imagen"
     )
+
+
+def build_image_metadata_tool(
+    image: Image.Image,
+    filename: str,
+    content_type: str,
+    size_bytes: int,
+) -> Any:
+    def inspect_image_metadata() -> dict[str, object]:
+        """Obtiene datos tecnicos de la imagen cuando ayudan al analisis visual."""
+        width, height = image.size
+        if width > height:
+            orientation = "paisaje"
+        elif height > width:
+            orientation = "retrato"
+        else:
+            orientation = "cuadrado"
+
+        return {
+            "filename": filename,
+            "content_type": content_type,
+            "width": width,
+            "height": height,
+            "orientation": orientation,
+            "mode": image.mode,
+            "format": image.format,
+            "size_bytes": size_bytes,
+        }
+
+    return inspect_image_metadata
 
 
 def _allowed_origins() -> list[str]:
@@ -152,13 +182,25 @@ async def analyze_image(
     describer = AssistantAgent(
         name="description_agent",
         model_client=model_client,
+        tools=[
+            build_image_metadata_tool(
+                image=pil_image,
+                filename=image.filename or "imagen",
+                content_type=image.content_type or "unknown",
+                size_bytes=len(image_bytes),
+            )
+        ],
+        reflect_on_tool_use=True,
+        max_tool_iterations=2,
         system_message=(
             "Se te da bien describir imagenes con detalle y tambien estructurar "
             "esa descripcion de forma clara. Describe la imagen que recibes con "
             "mucho detalle, incluyendo objetos, colores, personas, emociones, "
             "texto visible, estilo y mensaje probable. Si no puedes describir "
-            "algo con certeza, dilo claramente. Estructura tu respuesta usando "
-            "el modelo ImageDescription que te doy."
+            "algo con certeza, dilo claramente. Puedes usar la herramienta "
+            "inspect_image_metadata cuando necesites datos tecnicos como ancho, "
+            "alto, formato u orientacion. No la uses si no aporta valor. "
+            "Estructura tu respuesta usando el modelo ImageDescription que te doy."
         ),
         output_content_type=ImageDescription,
     )
