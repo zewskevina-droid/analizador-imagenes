@@ -222,29 +222,39 @@ button:active {
 
 .composer {
   display: grid;
-  grid-template-columns: minmax(180px, auto) 1fr auto;
-  gap: 10px;
-  padding: 15px;
+  grid-template-columns: minmax(180px, 260px) 1fr minmax(116px, auto);
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
   border-top: 1px solid var(--line);
   background: linear-gradient(180deg, var(--panel-2), #0c1c30);
 }
 
 .image-picker {
-  display: grid;
-  place-items: center;
-  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  min-width: 0;
   border: 1px solid var(--line-strong);
   border-radius: 8px;
-  padding: 0 15px;
-  background: #071525;
+  padding: 0 16px;
+  background: linear-gradient(180deg, #0c2138, #071525);
   color: var(--ink);
   font-weight: 800;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .image-picker:hover {
   border-color: var(--accent);
   background: var(--accent-soft);
+}
+
+.image-picker span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .image-picker input {
@@ -253,6 +263,16 @@ button:active {
   height: 1px;
   opacity: 0;
   pointer-events: none;
+}
+
+.composer input[type="text"] {
+  height: 48px;
+}
+
+.composer button {
+  height: 48px;
+  min-width: 112px;
+  box-shadow: 0 10px 22px rgba(56, 189, 248, 0.18);
 }
 
 @media (max-width: 720px) {
@@ -289,4 +309,3 @@ button:active {
     min-height: 44px;
   }
 }
-
