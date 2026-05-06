@@ -1,21 +1,21 @@
 :root {
-  color-scheme: dark;
-  --bg: #06111f;
-  --bg-2: #0a1b30;
-  --panel: #0d2037;
-  --panel-2: #102a46;
-  --panel-3: #0a1829;
-  --ink: #eef6ff;
-  --muted: #9fb4cc;
-  --line: #24405e;
-  --line-strong: #315579;
-  --accent: #38bdf8;
-  --accent-dark: #0284c7;
-  --accent-soft: #123a58;
-  --user: #123d6a;
-  --assistant: #0b1728;
-  --danger: #fecaca;
-  --danger-bg: #451a24;
+  color-scheme: light;
+  --bg: #ffffff;
+  --page: #f5f8fc;
+  --panel: #ffffff;
+  --panel-soft: #f8fbff;
+  --ink: #0f172a;
+  --muted: #5f6f85;
+  --line: #c8d7ea;
+  --line-strong: #7bb4f5;
+  --highlight: #d9ecff;
+  --accent: #1677d2;
+  --accent-dark: #0f5eaa;
+  --accent-soft: #e8f3ff;
+  --user: #eaf4ff;
+  --assistant: #ffffff;
+  --danger: #b42318;
+  --danger-bg: #fff3f2;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -26,10 +26,7 @@
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(circle at 16% 18%, rgba(56, 189, 248, 0.18), transparent 28%),
-    radial-gradient(circle at 86% 8%, rgba(37, 99, 235, 0.16), transparent 30%),
-    linear-gradient(135deg, var(--bg), var(--bg-2) 58%, #071525);
+  background: linear-gradient(180deg, var(--bg), var(--page));
   color: var(--ink);
 }
 
@@ -58,12 +55,11 @@ button:active {
   min-height: min(780px, calc(100vh - 56px));
   display: grid;
   grid-template-rows: auto auto 1fr auto;
-  background: rgba(13, 32, 55, 0.94);
-  border: 1px solid rgba(91, 141, 180, 0.34);
+  background: var(--panel);
+  border: 2px solid var(--highlight);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.46);
-  backdrop-filter: blur(14px);
+  box-shadow: 0 24px 70px rgba(28, 72, 122, 0.14);
 }
 
 .topbar {
@@ -72,12 +68,13 @@ button:active {
   justify-content: space-between;
   gap: 16px;
   padding: 20px 22px;
-  border-bottom: 1px solid var(--line);
-  background: linear-gradient(180deg, #112b49, #0d2037);
+  border-bottom: 2px solid var(--highlight);
+  background: var(--panel);
 }
 
 .topbar h1 {
   margin: 0;
+  color: #0b2341;
   font-size: 1.18rem;
   line-height: 1.25;
   letter-spacing: 0;
@@ -92,22 +89,23 @@ button:active {
 .icon-button {
   width: 42px;
   height: 42px;
-  border: 1px solid var(--line-strong);
+  border: 2px solid var(--highlight);
   border-radius: 8px;
-  background: #0b1a2c;
-  color: var(--ink);
+  background: var(--panel-soft);
+  color: var(--accent-dark);
   cursor: pointer;
 }
 
 .icon-button:hover {
-  border-color: var(--accent);
+  border-color: var(--line-strong);
+  background: var(--accent-soft);
   color: var(--accent);
 }
 
 .settings {
   padding: 16px 22px;
-  border-bottom: 1px solid var(--line);
-  background: var(--panel-3);
+  border-bottom: 2px solid var(--highlight);
+  background: var(--panel-soft);
 }
 
 .settings label {
@@ -115,7 +113,7 @@ button:active {
   margin-bottom: 8px;
   color: var(--muted);
   font-size: 0.84rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .settings-row {
@@ -127,31 +125,31 @@ button:active {
 .settings input,
 .composer input[type="text"] {
   min-width: 0;
-  border: 1px solid var(--line);
+  border: 2px solid var(--highlight);
   border-radius: 8px;
   padding: 12px 13px;
   color: var(--ink);
-  background: #071525;
+  background: #ffffff;
   outline: none;
 }
 
 .settings input::placeholder,
 .composer input[type="text"]::placeholder {
-  color: #6f86a1;
+  color: #8292a7;
 }
 
 .settings input:focus,
 .composer input[type="text"]:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
+  box-shadow: 0 0 0 4px rgba(22, 119, 210, 0.12);
 }
 
 .settings button,
 .composer button {
-  border: 0;
+  border: 2px solid var(--accent);
   border-radius: 8px;
   padding: 0 18px;
-  color: #04111f;
+  color: #ffffff;
   background: var(--accent);
   font-weight: 800;
   cursor: pointer;
@@ -159,14 +157,16 @@ button:active {
 
 .settings button:hover,
 .composer button:hover {
-  background: #7dd3fc;
+  border-color: var(--accent-dark);
+  background: var(--accent-dark);
 }
 
 .settings button:disabled,
 .composer button:disabled {
   cursor: wait;
-  color: #b7c5d7;
-  background: #28435f;
+  color: #dbeafe;
+  background: #8bbce8;
+  border-color: #8bbce8;
 }
 
 .messages {
@@ -175,19 +175,17 @@ button:active {
   gap: 14px;
   padding: 22px;
   overflow-y: auto;
-  background:
-    linear-gradient(rgba(13, 32, 55, 0.88), rgba(13, 32, 55, 0.88)),
-    repeating-linear-gradient(0deg, transparent 0 31px, rgba(255, 255, 255, 0.018) 32px);
+  background: #ffffff;
 }
 
 .message {
   max-width: min(740px, 92%);
-  border: 1px solid var(--line);
+  border: 2px solid var(--highlight);
   border-radius: 8px;
   padding: 13px 15px;
   line-height: 1.58;
   white-space: pre-wrap;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 10px 26px rgba(28, 72, 122, 0.08);
 }
 
 .message p {
@@ -197,17 +195,17 @@ button:active {
 .message.user {
   align-self: flex-end;
   background: var(--user);
-  border-color: #256aa3;
+  border-color: var(--line-strong);
 }
 
 .message.assistant {
   align-self: flex-start;
   background: var(--assistant);
-  border-color: var(--line);
+  border-color: var(--highlight);
 }
 
 .message.error {
-  border-color: #fca5a5;
+  border-color: #fecdca;
   color: var(--danger);
   background: var(--danger-bg);
 }
@@ -217,7 +215,7 @@ button:active {
   display: block;
   margin-top: 12px;
   border-radius: 8px;
-  border: 1px solid var(--line-strong);
+  border: 2px solid var(--highlight);
 }
 
 .composer {
@@ -226,8 +224,8 @@ button:active {
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  border-top: 1px solid var(--line);
-  background: linear-gradient(180deg, var(--panel-2), #0c1c30);
+  border-top: 2px solid var(--highlight);
+  background: var(--panel-soft);
 }
 
 .image-picker {
@@ -236,11 +234,11 @@ button:active {
   justify-content: center;
   height: 48px;
   min-width: 0;
-  border: 1px solid var(--line-strong);
+  border: 2px solid var(--highlight);
   border-radius: 8px;
   padding: 0 16px;
-  background: linear-gradient(180deg, #0c2138, #071525);
-  color: var(--ink);
+  background: #ffffff;
+  color: var(--accent-dark);
   font-weight: 800;
   cursor: pointer;
   overflow: hidden;
@@ -272,7 +270,7 @@ button:active {
 .composer button {
   height: 48px;
   min-width: 112px;
-  box-shadow: 0 10px 22px rgba(56, 189, 248, 0.18);
+  box-shadow: 0 10px 22px rgba(22, 119, 210, 0.18);
 }
 
 @media (max-width: 720px) {
@@ -309,3 +307,4 @@ button:active {
     min-height: 44px;
   }
 }
+
