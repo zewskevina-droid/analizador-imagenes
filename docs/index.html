@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Analizador de imagenes</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="chat-panel" aria-label="Chat para analizar imagenes">
+        <header class="topbar">
+          <div>
+            <h1>Analizador de imagenes</h1>
+            <p>Selecciona una imagen y pide un analisis visual.</p>
+          </div>
+          <button class="icon-button" id="settingsButton" type="button" title="Configurar backend" aria-label="Configurar backend">&#9881;</button>
+        </header>
+
+        <div class="settings" id="settingsPanel" hidden>
+          <label for="backendUrl">Backend</label>
+          <div class="settings-row">
+            <input id="backendUrl" type="url" placeholder="https://tu-backend.com" />
+            <button id="saveBackend" type="button">Guardar</button>
+          </div>
+        </div>
+
+        <div class="messages" id="messages" aria-live="polite">
+          <article class="message assistant">
+            <p>Hola. Carga una imagen y dime que quieres saber sobre ella.</p>
+          </article>
+        </div>
+
+        <form class="composer" id="analyzeForm">
+          <label class="image-picker" for="imageInput">
+            <span id="fileLabel">Elegir imagen</span>
+            <input id="imageInput" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required />
+          </label>
+          <input id="promptInput" name="prompt" type="text" autocomplete="off" value="Describe esta imagen con detalle." />
+          <button id="sendButton" type="submit">Analizar</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

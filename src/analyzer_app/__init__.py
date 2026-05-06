@@ -1,0 +1,2 @@
+"""Image analyzer web app."""
+
