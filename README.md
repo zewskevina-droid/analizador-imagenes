@@ -47,11 +47,8 @@ http://127.0.0.1:8000
 
 1. Sube el repo a GitHub.
 2. En GitHub, entra a `Settings > Pages`.
-3. En `Build and deployment`, selecciona:
-   - Source: `Deploy from a branch`
-   - Branch: `main`
-   - Folder: `/docs`
-4. Guarda.
+3. En `Build and deployment`, selecciona `GitHub Actions`.
+4. Haz push a `main`.
 
 Cuando el sitio este publicado, abre la configuracion de la pagina y escribe la URL de tu backend Python en el campo `Backend`.
 
@@ -85,4 +82,3 @@ ALLOWED_ORIGINS=https://tu-usuario.github.io
 ├── requirements.txt
 └── README.md
 ```
-
