@@ -16,6 +16,11 @@ function defaultBackendUrl() {
   if (localHosts.includes(window.location.hostname)) {
     return window.location.origin;
   }
+
+  if (!window.location.hostname.endsWith("github.io")) {
+    return window.location.origin;
+  }
+
   return localStorage.getItem(backendKey) || "";
 }
 
@@ -117,4 +122,3 @@ form.addEventListener("submit", async (event) => {
     URL.revokeObjectURL(previewUrl);
   }
 });
-
