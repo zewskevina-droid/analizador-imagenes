@@ -31,7 +31,7 @@ copy .env.example .env
 
 Edita `.env` y agrega tu `OPENAI_API_KEY`.
 
-## Ejecutar
+## Ejecutar local
 
 ```bash
 uvicorn analyzer_app.main:app --app-dir src --reload
@@ -50,18 +50,41 @@ http://127.0.0.1:8000
 3. En `Build and deployment`, selecciona `GitHub Actions`.
 4. Haz push a `main`.
 
-Cuando el sitio este publicado, abre la configuracion de la pagina y escribe la URL de tu backend Python en el campo `Backend`.
+Pagina publicada:
 
-## Desplegar backend
+```text
+https://zewskevina-droid.github.io/analizador-imagenes/
+```
 
-Puedes desplegar el backend en servicios que ejecuten Python, por ejemplo Render, Railway, Fly.io, Azure App Service, Google Cloud Run o un VPS.
+## Desplegar backend en Render
+
+La pagina publicada en GitHub Pages necesita una URL de backend. El archivo `render.yaml` ya deja configurado un servicio web para Render.
+
+Pasos:
+
+1. Entra a Render.
+2. Crea un `New > Blueprint`.
+3. Selecciona este repositorio de GitHub.
+4. Render detectara `render.yaml`.
+5. Agrega la variable secreta `OPENAI_API_KEY`.
+6. Crea el servicio.
+7. Copia la URL publica del servicio, por ejemplo:
+
+```text
+https://analizador-imagenes-api.onrender.com
+```
+
+8. Abre la pagina de GitHub Pages.
+9. Haz clic en el boton de configuracion, pega la URL de Render en `Backend` y guarda.
+
+Tambien puedes desplegar el backend en Railway, Fly.io, Azure App Service, Google Cloud Run o un VPS.
 
 Variables necesarias:
 
 ```text
 OPENAI_API_KEY=...
 OPENAI_MODEL=gpt-4.1-mini
-ALLOWED_ORIGINS=https://tu-usuario.github.io
+ALLOWED_ORIGINS=https://zewskevina-droid.github.io
 ```
 
 `ALLOWED_ORIGINS` debe incluir la URL real de GitHub Pages para que el navegador pueda llamar al backend.
@@ -70,15 +93,16 @@ ALLOWED_ORIGINS=https://tu-usuario.github.io
 
 ```text
 .
-├── docs/
-│   ├── app.js
-│   ├── index.html
-│   └── styles.css
-├── src/
-│   └── analyzer_app/
-│       ├── __init__.py
-│       └── main.py
-├── .env.example
-├── requirements.txt
-└── README.md
++-- docs/
+|   +-- app.js
+|   +-- index.html
+|   +-- styles.css
++-- src/
+|   +-- analyzer_app/
+|       +-- __init__.py
+|       +-- main.py
++-- .env.example
++-- render.yaml
++-- requirements.txt
++-- README.md
 ```
