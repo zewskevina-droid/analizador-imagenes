@@ -3,11 +3,12 @@ from __future__ import annotations
 import os
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import MultiModalMessage
 from autogen_core import Image as AGImage
+from autogen_core.tools import FunctionTool
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -52,8 +53,8 @@ def build_image_metadata_tool(
     filename: str,
     content_type: str,
     size_bytes: int,
-) -> Any:
-    def inspect_image_metadata() -> dict[str, object]:
+) -> FunctionTool:
+    def inspect_image_metadata() -> dict[str, str | int | None]:
         """Obtiene datos tecnicos de la imagen cuando ayudan al analisis visual."""
         width, height = image.size
         if width > height:
@@ -74,7 +75,15 @@ def build_image_metadata_tool(
             "size_bytes": size_bytes,
         }
 
-    return inspect_image_metadata
+    return FunctionTool(
+        inspect_image_metadata,
+        name="inspect_image_metadata",
+        description=(
+            "Obtiene metadatos tecnicos de la imagen cargada: nombre, tipo, "
+            "dimensiones, orientacion, modo, formato y peso en bytes."
+        ),
+        strict=True,
+    )
 
 
 def _allowed_origins() -> list[str]:
