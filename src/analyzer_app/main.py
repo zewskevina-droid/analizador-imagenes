@@ -1,15 +1,21 @@
 from __future__ import annotations
 
-import base64
 import os
+from io import BytesIO
 from pathlib import Path
+from typing import Literal
 
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.messages import MultiModalMessage
+from autogen_core import Image as AGImage
+from autogen_ext.models.openai import OpenAIChatCompletionClient
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from openai import OpenAI, OpenAIError
+from PIL import Image, UnidentifiedImageError
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -30,6 +36,15 @@ SUPPORTED_CONTENT_TYPES = {
 }
 
 MAX_IMAGE_SIZE = 20 * 1024 * 1024
+
+
+class ImageDescription(BaseModel):
+    scene: str = Field(description="En resumen, la escena general de la imagen")
+    message: str = Field(description="El mensaje que la imagen intenta transmitir")
+    style: str = Field(description="El estilo artistico de la imagen")
+    orientation: Literal["retrato", "paisaje", "cuadrado"] = Field(
+        description="La orientacion de la imagen"
+    )
 
 
 def _allowed_origins() -> list[str]:
@@ -91,7 +106,7 @@ def health() -> dict[str, str]:
 async def analyze_image(
     image: UploadFile = File(...),
     prompt: str = Form(DEFAULT_PROMPT),
-) -> dict[str, str]:
+) -> dict[str, object]:
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise HTTPException(
@@ -113,33 +128,66 @@ async def analyze_image(
         )
 
     clean_prompt = prompt.strip() or DEFAULT_PROMPT
-    encoded_image = base64.b64encode(image_bytes).decode("utf-8")
-    data_url = f"data:{image.content_type};base64,{encoded_image}"
-
-    client = OpenAI(api_key=api_key)
     model = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 
     try:
-        response = client.responses.create(
-            model=model,
-            input=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "input_text", "text": clean_prompt},
-                        {"type": "input_image", "image_url": data_url},
-                    ],
-                }
-            ],
-        )
-    except OpenAIError as exc:
+        pil_image = Image.open(BytesIO(image_bytes))
+        pil_image.load()
+    except UnidentifiedImageError as exc:
         raise HTTPException(
-            status_code=502,
-            detail=f"No se pudo analizar la imagen con OpenAI: {exc}",
+            status_code=400,
+            detail="No se pudo leer la imagen. Sube un archivo de imagen valido.",
         ) from exc
 
+    ag_image = AGImage(pil_image)
+    multi_modal_message = MultiModalMessage(
+        content=[clean_prompt, ag_image],
+        source="User",
+    )
+
+    model_client = OpenAIChatCompletionClient(
+        model=model,
+        api_key=api_key,
+    )
+    describer = AssistantAgent(
+        name="description_agent",
+        model_client=model_client,
+        system_message=(
+            "Se te da bien describir imagenes con detalle y tambien estructurar "
+            "esa descripcion de forma clara. Describe la imagen que recibes con "
+            "mucho detalle, incluyendo objetos, colores, personas, emociones, "
+            "texto visible, estilo y mensaje probable. Si no puedes describir "
+            "algo con certeza, dilo claramente. Estructura tu respuesta usando "
+            "el modelo ImageDescription que te doy."
+        ),
+        output_content_type=ImageDescription,
+    )
+
+    try:
+        response = await describer.run(task=multi_modal_message)
+        reply = response.messages[-1].content
+        if isinstance(reply, ImageDescription):
+            structured = reply.model_dump()
+            analysis = (
+                f"Escena:\n{reply.scene}\n\n"
+                f"Mensaje:\n{reply.message}\n\n"
+                f"Estilo:\n{reply.style}\n\n"
+                f"Orientacion:\n{reply.orientation}"
+            )
+        else:
+            structured = None
+            analysis = str(reply)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"No se pudo analizar la imagen con AutoGen/OpenAI: {exc}",
+        ) from exc
+    finally:
+        await model_client.close()
+
     return {
-        "analysis": response.output_text,
+        "analysis": analysis,
+        "structured": structured,
         "model": model,
         "filename": image.filename or "imagen",
     }
