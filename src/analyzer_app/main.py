@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from io import BytesIO
 from pathlib import Path
@@ -46,6 +47,28 @@ class ImageDescription(BaseModel):
     orientation: Literal["retrato", "paisaje", "cuadrado"] = Field(
         description="La orientacion de la imagen"
     )
+
+
+def parse_image_description(raw_content: object) -> ImageDescription | None:
+    if isinstance(raw_content, ImageDescription):
+        return raw_content
+
+    text = str(raw_content).strip()
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+
+    try:
+        return ImageDescription.model_validate_json(text)
+    except ValueError:
+        try:
+            return ImageDescription.model_validate(json.loads(text))
+        except (ValueError, json.JSONDecodeError, TypeError):
+            return None
 
 
 def build_image_metadata_tool(
@@ -209,21 +232,23 @@ async def analyze_image(
             "algo con certeza, dilo claramente. Puedes usar la herramienta "
             "inspect_image_metadata cuando necesites datos tecnicos como ancho, "
             "alto, formato u orientacion. No la uses si no aporta valor. "
-            "Estructura tu respuesta usando el modelo ImageDescription que te doy."
+            "Responde solamente con JSON valido, sin Markdown, con esta forma: "
+            '{"scene": "...", "message": "...", "style": "...", '
+            '"orientation": "retrato|paisaje|cuadrado"}.'
         ),
-        output_content_type=ImageDescription,
     )
 
     try:
         response = await describer.run(task=multi_modal_message)
         reply = response.messages[-1].content
-        if isinstance(reply, ImageDescription):
-            structured = reply.model_dump()
+        parsed_reply = parse_image_description(reply)
+        if parsed_reply is not None:
+            structured = parsed_reply.model_dump()
             analysis = (
-                f"Escena:\n{reply.scene}\n\n"
-                f"Mensaje:\n{reply.message}\n\n"
-                f"Estilo:\n{reply.style}\n\n"
-                f"Orientacion:\n{reply.orientation}"
+                f"Escena:\n{parsed_reply.scene}\n\n"
+                f"Mensaje:\n{parsed_reply.message}\n\n"
+                f"Estilo:\n{parsed_reply.style}\n\n"
+                f"Orientacion:\n{parsed_reply.orientation}"
             )
         else:
             structured = None
